@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
-import pickle
 import matplotlib.pyplot as plt
 
 from sklearn.datasets import load_iris
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
 
 # ------------------------------------------------
 # PAGE CONFIG
@@ -67,9 +68,21 @@ df = pd.DataFrame(
 # LOAD SAVED MODEL
 # ------------------------------------------------
 
-model = pickle.load(open("model.pkl", "rb"))
+# ------------------------------------------------
+# TRAIN DBSCAN MODEL
+# ------------------------------------------------
 
-labels = model.labels_
+# Scale features
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(df)
+
+# Train DBSCAN
+model = DBSCAN(
+    eps=0.8,
+    min_samples=5
+)
+
+labels = model.fit_predict(scaled_data)
 
 df["Cluster"] = labels
 
@@ -206,30 +219,4 @@ st.download_button(
 # THEORY SECTION
 # ------------------------------------------------
 
-with st.expander("📚 About DBSCAN"):
 
-    st.markdown("""
-### What is DBSCAN?
-
-DBSCAN stands for Density-Based Spatial Clustering of Applications with Noise.
-
-### Advantages
-- Finds clusters automatically
-- Detects outliers/noise
-- Works with irregular cluster shapes
-
-### Disadvantages
-- Sensitive to parameter selection
-- Struggles with varying densities
-
-### Parameters
-- eps : Neighborhood radius
-- min_samples : Minimum points required to form a cluster
-""")
-
-# ------------------------------------------------
-# FOOTER
-# ------------------------------------------------
-
-st.markdown("---")
-st.caption("Machine Learning Mini Project | DBSCAN Clustering")
